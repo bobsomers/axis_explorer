@@ -5,7 +5,7 @@ import mido
 
 from axis_explorer.music import Pitch
 from axis_explorer.ndlr import NDLR
-from axis_explorer.scenes import AxisScene
+from axis_explorer.scenes import SceneManager
 
 
 BRIGHTNESS = 100
@@ -30,10 +30,10 @@ def main():
     deck.reset()
     deck.set_brightness(BRIGHTNESS)
 
-    scene = AxisScene(ndlr, Pitch.C)
-    scene.render(deck)
+    scene_manager = SceneManager(deck, ndlr)
+    scene_manager.render(deck)
     def callback(deck, key, state):
-        scene.key_change(deck, key, state)
+        scene_manager.key_change(deck, key, state)
     deck.set_key_callback(callback)
 
     print("\nRunning...")
