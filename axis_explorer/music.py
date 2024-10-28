@@ -1,20 +1,21 @@
 from enum import Enum
 
 
-# Deliberately in circle of fifths order to make things easier.
+# Deliberately in circle of fifths order to make things easier, and values
+# chosen to make to NDLR CC values.
 class Pitch(Enum):
-    C = 0
-    G = 1
-    D = 2
-    A = 3
-    E = 4
-    B = 5
-    Fs = 6
-    Db = 7
-    Ab = 8
-    Eb = 9
-    Bb = 10
-    F = 11
+    C = 1
+    G = 2
+    D = 3
+    A = 4
+    E = 5
+    B = 6
+    Fs = 7
+    Db = 8
+    Ab = 9
+    Eb = 10
+    Bb = 11
+    F = 12
 
 
 def pitch_str(p: Pitch) -> str:
@@ -24,14 +25,15 @@ def pitch_str(p: Pitch) -> str:
     return name
 
 
+# Values chosen deliberately to map to NDLR CC values.
 class ScaleMode(Enum):
-    Ionian = 0
-    Dorian = 1
-    Phrygian = 2
-    Lydian = 3
-    Mixolydian = 4
-    Aeolian = 5
-    Locrian = 6
+    Ionian = 1
+    Dorian = 2
+    Phrygian = 3
+    Lydian = 4
+    Mixolydian = 5
+    Aeolian = 6
+    Locrian = 7
 
 
 def mode_suffix_str(m: ScaleMode) -> str:
@@ -45,10 +47,10 @@ class CircleOfFifths:
         self.root = root
 
     def forward(self, number: int) -> Pitch:
-        return Pitch((self.root.value + number) % 12)
+        return Pitch(((self.root.value - 1 + number) % 12) + 1)
 
     def backward(self, number: int) -> Pitch:
-        return Pitch((self.root.value - number) % 12)
+        return Pitch(((self.root.value - 1 - number) % 12) + 1)
 
 
 def tritone_sub(pitch: Pitch) -> Pitch:

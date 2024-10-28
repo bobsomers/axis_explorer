@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
+import os
+import threading
 
 from PIL import Image, ImageColor, ImageDraw, ImageFont
-from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Devices.StreamDeckXL import StreamDeckXL
+from StreamDeck.ImageHelpers import PILHelper
 
-from music import Axis, Pitch, pitch_str, ScaleMode, mode_suffix_str
-
+from axis_explorer.music import Axis, Pitch, pitch_str, ScaleMode, mode_suffix_str
+from axis_explorer.ndlr import NDLR
 
 class Scene(ABC):
     def render(self, deck):
@@ -22,9 +25,11 @@ class Scene(ABC):
 
 
 class AxisScene(Scene):
-    def __init__(self, root: Pitch):
-        self.FONT_FILE = "Rajdhani-Bold.ttf"
+    def __init__(self, ndlr: NDLR, root: Pitch):
+        self.ndlr = ndlr
         self.axis = Axis(root)
+
+        self.FONT_FILE = Path(os.path.dirname(os.path.abspath(__file__))) / "Rajdhani-Bold.ttf"
         self.big_font = ImageFont.truetype(self.FONT_FILE, 40)
         self.mid_font = ImageFont.truetype(self.FONT_FILE, 30)
         self.small_font = ImageFont.truetype(self.FONT_FILE, 20)
@@ -82,16 +87,21 @@ class AxisScene(Scene):
         self._set_key_image(deck, key)
 
     def key_change(self, deck: StreamDeckXL, key: int, pressed: bool):
+        if not pressed:
+            return
+
         _, axis_pitch, axis_quality, scale_mode = self.keys[key]
 
         if axis_pitch is None and axis_quality is None and scale_mode is None:
             # TODO: Return to root note selection scene
-
-        # What we can send:
-        # Chord Degree (CC=27)
-        # Key (CC=73)
-        # Mode (CC=74)
-        pass
+            pass
+        elif axis_pitch is None and scale_mode is not None:
+            self.ndlr.set_key(self.axis.circle.root)
+            self.ndlr.set_mode(scale_mode)
+        elif axis_pitch is not None and scale_mode is not None:
+            self.ndlr.set_key(axis_pitch)
+            self.ndlr.set_mode(scale_mode)
+            self.ndlr.set_chord_degree(1)
 
     def _set_key_image(self, deck: StreamDeckXL, key: int):
         bgcolor, axis_pitch, axis_quality, scale_mode = self.keys[key]
@@ -129,15 +139,3 @@ class AxisScene(Scene):
                       fill="white")
 
         deck.set_key_image(key, PILHelper.to_native_key_format(deck, image))
-
-
-if __name__ == "__main__":
-    from StreamDeck.DeviceManager import DeviceManager
-    decks = DeviceManager().enumerate()
-    deck = decks[0]
-    deck.open()
-    deck.reset()
-    deck.set_brightness(100)
-
-    scene = AxisScene(Pitch.C)
-    scene.render(deck)
