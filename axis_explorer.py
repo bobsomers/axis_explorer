@@ -24,6 +24,7 @@ def main():
     ndlr_outs= [o for o in midi_outputs if "NDLR" in o]
     ndlr_out_1 = [o for o in ndlr_outs if " 1" in o]
     assert(len(ndlr_out_1) == 1)
+    ndlr_out_1 = ndlr_out_1[0]
 
     deck = decks[0]
     midi_device = ndlr_out_1
