@@ -21,9 +21,12 @@ def main():
     print(f"\nFound {len(midi_outputs)} MIDI output device(s):")
     for midi_out in midi_outputs:
         print(f"  {midi_out}")
+    ndlr_devices = [d for d in devices if "NDLR" in d]
+    ndlr_device_1 = [d for d in ndlr_devices if " 1" in d]
+    assert(len(ndlr_device_1) == 1)
 
     deck = decks[0]
-    midi_device= "NDLR Port 1"
+    midi_device = ndlr_device_1
     ndlr = NDLR(midi_device, 15)
 
     deck.open()
